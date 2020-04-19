@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <title>Audio cording</title>
+    </head>
+    <body>
+        <button onclick="start()">Start!</button>
+        <button onclick="snap()">Snap!</button><div id="div"></div>
+        <video id="video" width="160" height="120" autoplay muted></video>
+        <audio id="audio" autoplay></audio>
+        <canvas class="myStream" style="display: none;" id="preview" width="640" height="480"></canvas>
+        <canvas class="otherStream" width="640" height="480"></canvas>
+
+        <div class="log"></div>
+        <script src="/assets/js/socket-io.client.min.js"></script>
+        <script src="/assets/js/socket.live.js"></script>
+
+
+        <script async src="/assets/js/html5.stream.js"></script>
+    </body>
+</html>
