@@ -1,37 +1,36 @@
 var host = window.location.host;
 
-var socket = io(`http://${host}`);
+var socket = io(`https://${host}`);
 var other = document.querySelector("canvas.otherStream");
 var audio = document.querySelector('audio');
 var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let audioBuffer = audioCtx.createBuffer(1, 8192, 44100);
 
 socket.on('connect', function(){});
 socket.on('welcome', function(data){
     socket.emit('incoming', 'Yo');
 });
 
-socket.on('outputstream', (data) => {
-    
-    blob2canvas(other, data.video);
-    bufferAudio(data.audio);
-    document.querySelector('div.log').innerHTML = new Date().getTime();
+socket.on('outputstream-video', (data) => {
+    blob2canvas(other, data);
 })
+
+socket.on('outputstream-audio', (data) => {
+    bufferAudio(data);
+})
+
 socket.on('disconnect', function(){});
 
 function bufferAudio(audioFloat32)
 {
-    let audioBuffer = audioCtx.createBuffer(1, 2048, 44100);
-    audioFloat32 = Float32Array.from(Object.values(audioFloat32))
     
+    //audioFloat32 = Float32Array.from(Object.values(audioFloat32))
+    audioFloat32 = I8AtoF32A(Object.values(audioFloat32))
     audioBuffer.copyToChannel(audioFloat32, 0);
     
     let source = audioCtx.createBufferSource();
-    // set the buffer in the AudioBufferSourceNode
     source.buffer = audioBuffer;
-    // connect the AudioBufferSourceNode to the
-    // destination so we can hear the sound
     source.connect(audioCtx.destination);
-    // start the source playing
     source.start();
 }
 
@@ -42,4 +41,13 @@ function blob2canvas(canvas, blob){
         ctx.drawImage(img,0,0);
     }
     img.src = blob;
+}
+
+const I8AtoF32A = (incomingData) => { 
+    var i, l = incomingData.length;
+    var outputData = new Float32Array(incomingData.length * 2);
+    for (i = 0; i < l; i++) {
+        outputData[i] = (incomingData[i] - 128) / 128.0;
+    }
+    return outputData;
 }
